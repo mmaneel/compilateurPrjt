@@ -15,4 +15,15 @@ while(a<5){
 }
 
 }
+fun myFunction1() {
+        PRINT("Hello, World!")
+    }
+    if (a > 0) {
+        PRINT("a is positive")
+    } else {
+        PRINT("a is non-positive")
+    }
+    if(x>3) {
+        PRINT("This should not be executed")
+    }
 }

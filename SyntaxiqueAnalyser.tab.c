@@ -225,7 +225,7 @@ qFifo * quadFifo;
 
 void yysuccess(char *s);
 void yyerror(const char *s);
-void yyerrorSemantic(char *s);
+void err(char *s);
 void showLexicalError();
 
 
@@ -625,8 +625,8 @@ static const yytype_int16 yyrline[] =
      965,   966,   968,   969,   970,   971,   972,   996,  1007,  1010,
     1013,  1014,  1015,  1016,  1019,  1020,  1071,  1079,  1080,  1081,
     1082,  1083,  1084,  1085,  1088,  1095,  1098,  1100,  1101,  1102,
-    1106,  1120,  1135,  1140,  1141,  1144,  1145,  1147,  1148,  1149,
-    1150,  1151,  1154,  1155,  1158,  1159,  1162,  1172
+    1106,  1121,  1137,  1142,  1143,  1146,  1147,  1149,  1150,  1151,
+    1152,  1153,  1156,  1157,  1160,  1161,  1164,  1174
 };
 #endif
 
@@ -1773,7 +1773,7 @@ yyreduce:
             }
             else
             {
-                yyerrorSemantic( "Incompatibilité de types");
+                err( "Incompatibilité de types");
             }
     }
 #line 1780 "SyntaxiqueAnalyser.tab.c"
@@ -1958,7 +1958,7 @@ yyreduce:
             }
             else
             {
-                yyerrorSemantic( "Incompatibilité de types");
+                err( "Incompatibilité de types");
             }
     }
 #line 1965 "SyntaxiqueAnalyser.tab.c"
@@ -1968,7 +1968,7 @@ yyreduce:
 #line 531 "SyntaxiqueAnalyser.y"
                      {
         if((yyvsp[0].expression).type==NULL){
-          yyerrorSemantic( "expression est ulle dans 420");
+          err( "expression est ulle dans 420");
 
         }
             if((yyvsp[0].expression).type != TYPE_STRING)
@@ -1988,7 +1988,7 @@ yyreduce:
                 }
             }
             else{
-                yyerrorSemantic( "Expression non numérique détectée");
+                err( "Expression non numérique détectée");
             }
     }
 #line 1995 "SyntaxiqueAnalyser.tab.c"
@@ -2135,7 +2135,7 @@ yyreduce:
             }
             else
             {
-                yyerrorSemantic( "Incompatibilité de types");
+                err( "Incompatibilité de types");
             }
     }
 #line 2142 "SyntaxiqueAnalyser.tab.c"
@@ -2147,7 +2147,7 @@ yyreduce:
             if((yyvsp[-2].expression).type == (yyvsp[0].expression).type){
                     if((yyvsp[-2].expression).type == TYPE_STRING)
                     {
-                        yyerrorSemantic( "Type mismatch");
+                        err( "Types incompatibles ");
                     }
                     else{
                         if((yyvsp[-2].expression).type == TYPE_INTEGER)
@@ -2281,7 +2281,7 @@ yyreduce:
             }
             else
             {
-                yyerrorSemantic( "Incompatibilité de types");
+                err( "Incompatibilité de types");
             }
     }
 #line 2288 "SyntaxiqueAnalyser.tab.c"
@@ -2293,13 +2293,13 @@ yyreduce:
             if((yyvsp[-2].expression).type == (yyvsp[0].expression).type){
                     if((((yyvsp[0].expression).type == TYPE_INTEGER) && ((yyvsp[0].expression).integerValue == 0)) || (((yyvsp[0].expression).type == TYPE_FLOAT) && ((yyvsp[0].expression).floatValue == 0.0)))
                     {
-                        yyerrorSemantic( "Division by zero");
+                        err( "Division by zero");
                     }
                     else
                     {
                         if((yyvsp[-2].expression).type == TYPE_STRING)
                         {
-                            yyerrorSemantic( "Incompatibilité de types");
+                            err( "Incompatibilité de types");
                         }
                         else{
                             if((yyvsp[-2].expression).type == TYPE_INTEGER)
@@ -2393,7 +2393,7 @@ yyreduce:
             }
             else
             {
-                yyerrorSemantic( "Type mismatch");
+                err( "Type mismatch");
             }
     }
 #line 2400 "SyntaxiqueAnalyser.tab.c"
@@ -2442,7 +2442,7 @@ yyreduce:
                 }
                 qc++;
             }else{
-                yyerrorSemantic("Incompatibilité de types");
+                err("Incompatibilité de types");
             }
         }
     }
@@ -2458,7 +2458,7 @@ yyreduce:
             insererSymbole(&tableSymboles, nouveauSymbole);
             (yyval.symbole) = nouveauSymbole;
         }else{
-            yyerrorSemantic( "Id already declared");
+            err( "Identificateur deja déclaré ");
             (yyval.symbole) = NULL;
         }
     }
@@ -2469,15 +2469,15 @@ yyreduce:
 #line 1020 "SyntaxiqueAnalyser.y"
                    {
         if((yyvsp[-1].variable).symbole != NULL){
-            if(!(yyvsp[-1].variable).symbole->hasBeenInitialized){
-                yyerrorSemantic( "Variable non initialisée");
+            if(!(yyvsp[-1].variable).symbole->isInitialized){
+                err( "Variable non initialisée");
             }else{
                 if((yyvsp[-1].variable).symbole->isConstant){
-                    yyerrorSemantic("Impossible de réassigner une valeur à une constante");
+                    err("Impossible de réassigner une valeur à une constante");
                 }else{
                 if((yyvsp[-1].variable).symbole->type % simpleToArrayOffset != TYPE_FLOAT
                 && (yyvsp[-1].variable).symbole->type % simpleToArrayOffset != TYPE_INTEGER){
-                    yyerrorSemantic( "Variable non numérique trouvée");
+                    err( "Variable non numérique trouvée");
                 }else{
 
                     char valeurString[255];
@@ -2487,7 +2487,7 @@ yyreduce:
                         {
                             getValeur((yyvsp[-1].variable).symbole, valeurString);
                             if(isForLoop){
-                                pushFifo(quadFifo, creerQuadreplet("ADD", (yyvsp[-1].variable).symbole->nom, "1", (yyvsp[-1].variable).symbole->nom, qc));
+                                pushFifo(quadFifo, genererQuadruplet("ADD", (yyvsp[-1].variable).symbole->nom, "1", (yyvsp[-1].variable).symbole->nom, qc));
                             }else{
 
                                 insererQuadreplet(&q, "ADD", (yyvsp[-1].variable).symbole->nom, "1", (yyvsp[-1].variable).symbole->nom, qc);
@@ -2526,10 +2526,10 @@ yyreduce:
                                      {
         char adresse[10];
     char adresseCondWhile [10];
-    int sauvAdrDebutWhile = depiler(stack);
+    int sauvAdrDebutWhile = depiler(stack);//pour avoir laddresse de la condition
     int sauvAdrCondWhile = depiler(stack);
     sprintf(adresseCondWhile,"%d",sauvAdrCondWhile);
-    insererQuadreplet(&q,"BR",adresseCondWhile,"","",qc);
+    insererQuadreplet(&q,"BR",adresseCondWhile,"","",qc);//pour brancher vers le test de la condition 
     qc++;
     sprintf(adresse,"%d",qc);
     updateQuadreplet(q,sauvAdrDebutWhile,adresse);
@@ -2539,7 +2539,7 @@ yyreduce:
     break;
 
   case 71: /* DebutWhile: ConditionWhile Expression parenthesefermante acolladeouvrante  */
-#line 1120 "SyntaxiqueAnalyser.y"
+#line 1121 "SyntaxiqueAnalyser.y"
                                                                       {
             if((yyvsp[-2].expression).type == TYPE_BOOLEAN){
         char r[10]; // contien le resultat de l'expression de la condition
@@ -2550,7 +2550,7 @@ yyreduce:
         // quadreplet
 		qc++;
     }else{
-        yyerrorSemantic( "Expression non booléenne trouvée");
+        err( "Expression non booléenne trouvée");
     }
 
         }
@@ -2558,7 +2558,7 @@ yyreduce:
     break;
 
   case 72: /* ConditionWhile: WHILE parentheseouvrante  */
-#line 1135 "SyntaxiqueAnalyser.y"
+#line 1137 "SyntaxiqueAnalyser.y"
                                 {
         empiler(stack,qc);
       }
@@ -2566,35 +2566,35 @@ yyreduce:
     break;
 
   case 78: /* Valeur: INT  */
-#line 1148 "SyntaxiqueAnalyser.y"
+#line 1150 "SyntaxiqueAnalyser.y"
           { (yyval.expression).type = TYPE_INTEGER; (yyval.expression).integerValue = (yyvsp[0].integerValue); }
 #line 2572 "SyntaxiqueAnalyser.tab.c"
     break;
 
   case 79: /* Valeur: REAL  */
-#line 1149 "SyntaxiqueAnalyser.y"
+#line 1151 "SyntaxiqueAnalyser.y"
            { (yyval.expression).type = TYPE_FLOAT; (yyval.expression).floatValue = (yyvsp[0].floatValue ); }
 #line 2578 "SyntaxiqueAnalyser.tab.c"
     break;
 
   case 80: /* Valeur: STRING  */
-#line 1150 "SyntaxiqueAnalyser.y"
+#line 1152 "SyntaxiqueAnalyser.y"
             { (yyval.expression).type = TYPE_STRING; strcpy((yyval.expression).stringValue, (yyvsp[0].stringValue)); }
 #line 2584 "SyntaxiqueAnalyser.tab.c"
     break;
 
   case 81: /* Valeur: BOOL  */
-#line 1151 "SyntaxiqueAnalyser.y"
+#line 1153 "SyntaxiqueAnalyser.y"
            { (yyval.expression).type = TYPE_BOOLEAN; (yyval.expression).booleanValue = (yyvsp[0].booleanValue); }
 #line 2590 "SyntaxiqueAnalyser.tab.c"
     break;
 
   case 86: /* Variable: IDF  */
-#line 1162 "SyntaxiqueAnalyser.y"
+#line 1164 "SyntaxiqueAnalyser.y"
         {
         symbole * s = rechercherSymbole(tableSymboles, (yyvsp[0].identifier));
         if(s==NULL){
-            yyerrorSemantic( "variable  inconnue");
+            err( "variable  inconnue");
             (yyval.variable).symbole = NULL;
         }else{
             (yyval.variable).symbole = s;
@@ -2829,7 +2829,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 1176 "SyntaxiqueAnalyser.y"
+#line 1178 "SyntaxiqueAnalyser.y"
 
 void yysuccess(char *s){
     currentColumn+=yyleng;
@@ -2840,7 +2840,7 @@ void yyerror(const char *s) {
     hasFailed = true;
 }
 
-void yyerrorSemantic(char *s){
+void err(char *s){
     fprintf(stdout, "File '%s', line %d, character %d, ssemantic error: " RED " %s " RESET "\n", file, yylineno, currentColumn, s);
     hasFailed = true;
     return;
@@ -2861,7 +2861,7 @@ int main (void)
     yyparse();  
     if (!hasFailed){
 
-    afficherTableSymboles(tableSymboles);
+    afficherTs(tableSymboles);
     
     afficherQuad(q);
     }

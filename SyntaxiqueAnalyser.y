@@ -148,7 +148,7 @@ qFifo * quadFifo;
 
 void yysuccess(char *s);
 void yyerror(const char *s);
-void yyerrorSemantic(char *s);
+void err(char *s);
 void showLexicalError();
 
 %}
@@ -350,7 +350,7 @@ Expression:
             }
             else
             {
-                yyerrorSemantic( "Incompatibilité de types");
+                err( "Incompatibilité de types");
             }
     }
     | Variable{
@@ -525,12 +525,12 @@ Expression:
             }
             else
             {
-                yyerrorSemantic( "Incompatibilité de types");
+                err( "Incompatibilité de types");
             }
     }
     | ADD Expression {
         if($2.type==NULL){
-          yyerrorSemantic( "expression est ulle dans 420");
+          err( "expression est ulle dans 420");
 
         }
             if($2.type != TYPE_STRING)
@@ -550,7 +550,7 @@ Expression:
                 }
             }
             else{
-                yyerrorSemantic( "Expression non numérique détectée");
+                err( "Expression non numérique détectée");
             }
     }
     | Expression LESS Expression {
@@ -692,14 +692,14 @@ Expression:
             }
             else
             {
-                yyerrorSemantic( "Incompatibilité de types");
+                err( "Incompatibilité de types");
             }
     }
     | Expression MUL Expression {
             if($1.type == $3.type){
                     if($1.type == TYPE_STRING)
                     {
-                        yyerrorSemantic( "Type mismatch");
+                        err( "Types incompatibles ");
                     }
                     else{
                         if($1.type == TYPE_INTEGER)
@@ -833,20 +833,20 @@ Expression:
             }
             else
             {
-                yyerrorSemantic( "Incompatibilité de types");
+                err( "Incompatibilité de types");
             }
     }
     | Expression DIV Expression {
             if($1.type == $3.type){
                     if((($3.type == TYPE_INTEGER) && ($3.integerValue == 0)) || (($3.type == TYPE_FLOAT) && ($3.floatValue == 0.0)))
                     {
-                        yyerrorSemantic( "Division by zero");
+                        err( "Division by zero");
                     }
                     else
                     {
                         if($1.type == TYPE_STRING)
                         {
-                            yyerrorSemantic( "Incompatibilité de types");
+                            err( "Incompatibilité de types");
                         }
                         else{
                             if($1.type == TYPE_INTEGER)
@@ -940,7 +940,7 @@ Expression:
             }
             else
             {
-                yyerrorSemantic( "Type mismatch");
+                err( "Type mismatch");
             }
     }
     | INT { $$.type = TYPE_INTEGER; $$.integerValue = $1; }
@@ -986,7 +986,7 @@ DeclarationInitial:
                 }
                 qc++;
             }else{
-                yyerrorSemantic("Incompatibilité de types");
+                err("Incompatibilité de types");
             }
         }
     }
@@ -1000,7 +1000,7 @@ DeclarationSimple:
             insererSymbole(&tableSymboles, nouveauSymbole);
             $$ = nouveauSymbole;
         }else{
-            yyerrorSemantic( "Id already declared");
+            err( "Identificateur deja déclaré ");
             $$ = NULL;
         }
     }
@@ -1019,15 +1019,15 @@ Aff:
     Variable Affectation Expression
     | Variable INC {
         if($1.symbole != NULL){
-            if(!$1.symbole->hasBeenInitialized){
-                yyerrorSemantic( "Variable non initialisée");
+            if(!$1.symbole->isInitialized){
+                err( "Variable non initialisée");
             }else{
                 if($1.symbole->isConstant){
-                    yyerrorSemantic("Impossible de réassigner une valeur à une constante");
+                    err("Impossible de réassigner une valeur à une constante");
                 }else{
                 if($1.symbole->type % simpleToArrayOffset != TYPE_FLOAT
                 && $1.symbole->type % simpleToArrayOffset != TYPE_INTEGER){
-                    yyerrorSemantic( "Variable non numérique trouvée");
+                    err( "Variable non numérique trouvée");
                 }else{
 
                     char valeurString[255];
@@ -1037,7 +1037,7 @@ Aff:
                         {
                             getValeur($1.symbole, valeurString);
                             if(isForLoop){
-                                pushFifo(quadFifo, creerQuadreplet("ADD", $1.symbole->nom, "1", $1.symbole->nom, qc));
+                                pushFifo(quadFifo, genererQuadruplet("ADD", $1.symbole->nom, "1", $1.symbole->nom, qc));
                             }else{
 
                                 insererQuadreplet(&q, "ADD", $1.symbole->nom, "1", $1.symbole->nom, qc);
@@ -1102,20 +1102,21 @@ ConditionELSE: %empty
    |ELSE acolladeouvrante Bloc acolladefermante
    ;
 While:
-   
+   //routine fin while 
     DebutWhile Bloc acolladefermante {
         char adresse[10];
     char adresseCondWhile [10];
-    int sauvAdrDebutWhile = depiler(stack);
+    int sauvAdrDebutWhile = depiler(stack);//pour avoir laddresse de la condition
     int sauvAdrCondWhile = depiler(stack);
     sprintf(adresseCondWhile,"%d",sauvAdrCondWhile);
-    insererQuadreplet(&q,"BR",adresseCondWhile,"","",qc);
+    insererQuadreplet(&q,"BR",adresseCondWhile,"","",qc);//pour brancher vers le test de la condition 
     qc++;
     sprintf(adresse,"%d",qc);
     updateQuadreplet(q,sauvAdrDebutWhile,adresse);
 
     }
     ;
+    //routine condition while
     DebutWhile:
         ConditionWhile Expression parenthesefermante acolladeouvrante {
             if($2.type == TYPE_BOOLEAN){
@@ -1127,10 +1128,11 @@ While:
         // quadreplet
 		qc++;
     }else{
-        yyerrorSemantic( "Expression non booléenne trouvée");
+        err( "Expression non booléenne trouvée");
     }
 
         };
+        //finwhile
      ConditionWhile:   
       WHILE parentheseouvrante  {
         empiler(stack,qc);
@@ -1162,7 +1164,7 @@ Arguments:
     IDF {
         symbole * s = rechercherSymbole(tableSymboles, $1);
         if(s==NULL){
-            yyerrorSemantic( "variable  inconnue");
+            err( "variable  inconnue");
             $$.symbole = NULL;
         }else{
             $$.symbole = s;
@@ -1183,7 +1185,7 @@ void yyerror(const char *s) {
     hasFailed = true;
 }
 
-void yyerrorSemantic(char *s){
+void err(char *s){
     fprintf(stdout, "File '%s', line %d, character %d, ssemantic error: " RED " %s " RESET "\n", file, yylineno, currentColumn, s);
     hasFailed = true;
     return;
@@ -1204,7 +1206,7 @@ int main (void)
     yyparse();  
     if (!hasFailed){
 
-    afficherTableSymboles(tableSymboles);
+    afficherTs(tableSymboles);
     
     afficherQuad(q);
     }

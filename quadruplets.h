@@ -7,13 +7,13 @@ struct quad
 	char operande1[30];
 	char operande2[30];   
 	char resultat[30];   
-	int qc;    //it's named qc par convontion
+	int qc;    
     struct quad *suivant; // suivant pour liste lineare chainée
 };
 
 // machine abstraite 
 
-quad * creerQuadreplet(char opr[30],char op1[30],char op2[30],char res[30],int num);
+quad * genererQuadruplet(char opr[30],char op1[30],char op2[30],char res[30],int num);
 
 void insererQuadreplet(quad ** p,char opr[],char op1[],char op2[],char res[],int num);
 

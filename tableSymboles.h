@@ -24,7 +24,7 @@ struct symbole{
     int type;
     char valeur[COLS];
     bool isConstant;
-    bool hasBeenInitialized;
+    bool isInitialized ;
 
     symbole *suivant;
 };

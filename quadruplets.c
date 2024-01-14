@@ -3,21 +3,21 @@
 #include <string.h>
 #include "quadruplets.h"
 
-quad *creerQuadreplet(char opr[30],char op1[30],char op2[30],char res[30],int num){
+quad *genererQuadruplet(char opr[30],char op1[30],char op2[30],char res[30],int num){
     quad *q = (quad *)malloc(sizeof(quad));
     strcpy(q->operateur,opr);
     strcpy(q->operande1,op1);
     strcpy(q->operande2,op2);
     strcpy(q->resultat,res);
     q->qc=num;
-    q->suivant=NULL;
+    q->suivant=NULL;//lindex avec lequel on avace (pointeur dans ce cas)
     return q;
 }
 
 void insererQuadreplet(quad **p,char opr[],char op1[],char op2[],char res[],int num) {  
     quad *q;
     if(*p==NULL){
-        *p=creerQuadreplet(opr,op1,op2,res,num);
+        *p=genererQuadruplet(opr,op1,op2,res,num);
     }else{
     q = (quad *)malloc(sizeof(quad));
     strcpy(q->operateur,opr);
@@ -76,6 +76,8 @@ void afficherQuad(quad *q)
         printf("\n\n \t\t quad *Vide \n");
     }else{
         printf("**********************************************\n");
+        printf("**********************************************\n");
+
         afficherQuadsRecursion(p);
     }
     printf("**********************************************\n");
