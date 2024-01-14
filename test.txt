@@ -1,0 +1,18 @@
+prog try{
+INT a = 8
+INT b = a + 2
+INT c = 2 / 2
+INT d = c * 2
+INT x= ((a + 2) * b) / c 
+STRING str="hello, world"
+REAL y = 2.2
+BOOL k 
+while(a<18){
+ VAR a = a + 1
+ 
+while(a<5){
+ VAR b = b + 2
+}
+
+}
+}
